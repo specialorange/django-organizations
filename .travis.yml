@@ -1,18 +1,30 @@
 language: python
-python: 2.7
+
+python:
+    - "2.7"
+    - "3.4"
+    - "3.5"
+    - "3.6"
+
 env:
-  - TOX_ENV=py34-django10
-  - TOX_ENV=py34-django19
-  - TOX_ENV=py34-django18
-  - TOX_ENV=py27-django10
-  - TOX_ENV=py27-django19
-  - TOX_ENV=py27-django18
-  - TOX_ENV=pypy-django10
-  - TOX_ENV=pypy-django19
-  - TOX_ENV=pypy-django18
-  - TOX_ENV=flake8
+    - DJANGO_VERSION="Django>=1.8,<1.9"
+    - DJANGO_VERSION="Django>=1.9,<1.10"
+    - DJANGO_VERSION="Django>=1.10,<1.11"
+    - DJANGO_VERSION="https://github.com/django/django/archive/stable/1.11.x.zip#egg=Django"
+
+matrix:
+    exclude:
+        - python: "3.6"
+          env:
+            - DJANGO_VERSION="Django>=1.8,<1.9"
+            - DJANGO_VERSION="Django>=1.9,<1.10"
+
 install:
-  - pip install tox
+    - pip install $DJANGO_VERSION
+    - pip install requirements/requirements-test.txt
+
 script:
-  - tox -e $TOX_ENV
+    - pytest --cov=organizations
+    - flake8 organizations
+
 sudo: false
