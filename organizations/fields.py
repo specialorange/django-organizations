@@ -33,8 +33,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from __future__ import unicode_literals
-
 from importlib import import_module
 
 from django.conf import settings
@@ -70,8 +68,7 @@ class AutoLastModifiedField(AutoCreatedField):
         return value
 
 
-ORGS_SLUGFIELD = getattr(settings, 'ORGS_SLUGFIELD',
-                         'django_extensions.db.fields.AutoSlugField')
+ORGS_SLUGFIELD = getattr(settings, 'ORGS_SLUGFIELD', 'django_extensions.db.fields.AutoSlugField')
 
 try:
     module, klass = ORGS_SLUGFIELD.rsplit('.', 1)

@@ -27,28 +27,12 @@ from django.conf import settings
 from django.db import models
 from django.db.models.base import ModelBase
 from django.db.models.fields import FieldDoesNotExist
-
-try:
-    import six
-except ImportError:
-    from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 
 from organizations.managers import ActiveOrgManager
 from organizations.managers import OrgManager
 
 USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
-
-
-class UnicodeMixin(object):
-    """
-    Python 2 and 3 string representation support.
-    """
-    def __str__(self):
-        if six.PY3:
-            return self.__unicode__()
-        else:
-            return unicode(self).encode('utf-8')
 
 
 class OrgMeta(ModelBase):
@@ -123,12 +107,12 @@ class OrgMeta(ModelBase):
             cls.module_registry[module]['OrgUserModel']._meta.get_field("user")
         except FieldDoesNotExist:
             cls.module_registry[module]['OrgUserModel'].add_to_class("user",
-                models.ForeignKey(USER_MODEL, related_name="%(app_label)s_%(class)s"))
+                models.ForeignKey(USER_MODEL, on_delete=models.CASCADE, related_name="%(app_label)s_%(class)s"))
         try:
             cls.module_registry[module]['OrgUserModel']._meta.get_field("organization")
         except FieldDoesNotExist:
             cls.module_registry[module]['OrgUserModel'].add_to_class("organization",
-                models.ForeignKey(cls.module_registry[module]['OrgModel'],
+                models.ForeignKey(cls.module_registry[module]['OrgModel'], on_delete=models.CASCADE,
                         related_name="organization_users"))
 
     def update_org_owner(cls, module):
@@ -139,16 +123,16 @@ class OrgMeta(ModelBase):
             cls.module_registry[module]['OrgOwnerModel']._meta.get_field("organization_user")
         except FieldDoesNotExist:
             cls.module_registry[module]['OrgOwnerModel'].add_to_class("organization_user",
-                models.OneToOneField(cls.module_registry[module]['OrgUserModel']))
+                models.OneToOneField(cls.module_registry[module]['OrgUserModel'], on_delete=models.CASCADE))
         try:
             cls.module_registry[module]['OrgOwnerModel']._meta.get_field("organization")
         except FieldDoesNotExist:
             cls.module_registry[module]['OrgOwnerModel'].add_to_class("organization",
-                models.OneToOneField(cls.module_registry[module]['OrgModel'],
+                models.OneToOneField(cls.module_registry[module]['OrgModel'], on_delete=models.CASCADE,
                         related_name="owner"))
 
 
-class AbstractBaseOrganization(UnicodeMixin, models.Model):
+class AbstractBaseOrganization(models.Model):
     """
     The umbrella object with which users can be associated.
 
@@ -167,7 +151,7 @@ class AbstractBaseOrganization(UnicodeMixin, models.Model):
         abstract = True
         ordering = ['name']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     @property
@@ -178,19 +162,18 @@ class AbstractBaseOrganization(UnicodeMixin, models.Model):
         This provides a consistent interface across different organization
         model classes.
         """
-        return "{0}_{1}".format(self._meta.app_label.lower(),
-                self.__class__.__name__.lower())
+        return "{0}_{1}".format(self._meta.app_label.lower(), self.__class__.__name__.lower())
 
     def is_member(self, user):
         return True if user in self.users.all() else False
 
 
-class OrganizationBase(six.with_metaclass(OrgMeta, AbstractBaseOrganization)):
+class OrganizationBase(AbstractBaseOrganization, metaclass=OrgMeta):
     class Meta(AbstractBaseOrganization.Meta):
         abstract = True
 
 
-class AbstractBaseOrganizationUser(UnicodeMixin, models.Model):
+class AbstractBaseOrganizationUser(models.Model):
     """
     ManyToMany through field relating Users to Organizations.
 
@@ -207,8 +190,8 @@ class AbstractBaseOrganizationUser(UnicodeMixin, models.Model):
         ordering = ['organization', 'user']
         unique_together = ('user', 'organization')
 
-    def __unicode__(self):
-        return u"{0} ({1})".format(self.user.get_full_name() if self.user.is_active else
+    def __str__(self):
+        return "{0} ({1})".format(self.user.get_full_name() if self.user.is_active else
                 self.user.email, self.organization.name)
 
     @property
@@ -222,12 +205,12 @@ class AbstractBaseOrganizationUser(UnicodeMixin, models.Model):
         return "{0}".format(self.user)
 
 
-class OrganizationUserBase(six.with_metaclass(OrgMeta, AbstractBaseOrganizationUser)):
+class OrganizationUserBase(AbstractBaseOrganizationUser, metaclass=OrgMeta):
     class Meta(AbstractBaseOrganizationUser.Meta):
         abstract = True
 
 
-class AbstractBaseOrganizationOwner(UnicodeMixin, models.Model):
+class AbstractBaseOrganizationOwner(models.Model):
     """
     Each organization must have one and only one organization owner.
     """
@@ -235,10 +218,10 @@ class AbstractBaseOrganizationOwner(UnicodeMixin, models.Model):
     class Meta:
         abstract = True
 
-    def __unicode__(self):
-        return u"{0}: {1}".format(self.organization, self.organization_user)
+    def __str__(self):
+        return "{0}: {1}".format(self.organization, self.organization_user)
 
 
-class OrganizationOwnerBase(six.with_metaclass(OrgMeta, AbstractBaseOrganizationOwner)):
+class OrganizationOwnerBase(AbstractBaseOrganizationOwner, metaclass=OrgMeta):
     class Meta(AbstractBaseOrganizationOwner.Meta):
         abstract = True

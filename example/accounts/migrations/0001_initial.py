@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 'ordering': ['name'],
                 'abstract': False,
             },
-            bases=(organizations.base.UnicodeMixin, models.Model),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='AccountOwner',
@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(organizations.base.UnicodeMixin, models.Model),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='AccountUser',
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 'ordering': ['organization', 'user'],
                 'abstract': False,
             },
-            bases=(organizations.base.UnicodeMixin, models.Model),
+            bases=(models.Model,),
         ),
         migrations.AddField(
             model_name='accountowner',

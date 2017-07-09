@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'organization',
                 'verbose_name_plural': 'organizations',
             },
-            bases=(organizations.base.UnicodeMixin, models.Model),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='OrganizationOwner',
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'organization owner',
                 'verbose_name_plural': 'organization owners',
             },
-            bases=(organizations.base.UnicodeMixin, models.Model),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='OrganizationUser',
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'organization user',
                 'verbose_name_plural': 'organization users',
             },
-            bases=(organizations.base.UnicodeMixin, models.Model),
+            bases=(models.Model,),
         ),
         migrations.AddField(
             model_name='organizationowner',

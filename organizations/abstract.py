@@ -26,25 +26,20 @@
 import warnings
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
-try:
-    import six
-except ImportError:
-    from django.utils import six
-
-from organizations.base import OrgMeta
 from organizations.base import AbstractBaseOrganization
-from organizations.base import AbstractBaseOrganizationUser
 from organizations.base import AbstractBaseOrganizationOwner
-from organizations.fields import SlugField
+from organizations.base import AbstractBaseOrganizationUser
+from organizations.base import OrgMeta
 from organizations.fields import AutoCreatedField
 from organizations.fields import AutoLastModifiedField
+from organizations.fields import SlugField
+from organizations.signals import owner_changed
 from organizations.signals import user_added
 from organizations.signals import user_removed
-from organizations.signals import owner_changed
 
 USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 ORGS_TIMESTAMPED_MODEL = getattr(settings, 'ORGS_TIMESTAMPED_MODEL', None)
@@ -81,7 +76,7 @@ class SharedBaseModel(models.Model):
         abstract = True
 
 
-class AbstractOrganization(six.with_metaclass(OrgMeta, SharedBaseModel, AbstractBaseOrganization)):
+class AbstractOrganization(SharedBaseModel, AbstractBaseOrganization, metaclass=OrgMeta):
     """
     Abstract Organization model.
     """
@@ -94,7 +89,7 @@ class AbstractOrganization(six.with_metaclass(OrgMeta, SharedBaseModel, Abstract
         verbose_name = _("organization")
         verbose_name_plural = _("organizations")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -185,7 +180,7 @@ class AbstractOrganization(six.with_metaclass(OrgMeta, SharedBaseModel, Abstract
         return self.owner.organization_user.user == user
 
 
-class AbstractOrganizationUser(six.with_metaclass(OrgMeta, SharedBaseModel, AbstractBaseOrganizationUser)):
+class AbstractOrganizationUser(SharedBaseModel, AbstractBaseOrganizationUser, metaclass=OrgMeta):
     """
     Abstract OrganizationUser model
     """
@@ -196,9 +191,8 @@ class AbstractOrganizationUser(six.with_metaclass(OrgMeta, SharedBaseModel, Abst
         verbose_name = _("organization user")
         verbose_name_plural = _("organization users")
 
-    def __unicode__(self):
-        return u"{0} ({1})".format(self.name if self.user.is_active else
-                self.user.email, self.organization.name)
+    def __str__(self):
+        return "{0} ({1})".format(self.name if self.user.is_active else self.user.email, self.organization.name)
 
     def delete(self, using=None):
         """
@@ -219,10 +213,12 @@ class AbstractOrganizationUser(six.with_metaclass(OrgMeta, SharedBaseModel, Abst
 
     def get_absolute_url(self):
         return reverse('organization_user_detail', kwargs={
-            'organization_pk': self.organization.pk, 'user_pk': self.user.pk})
+            'organization_pk': self.organization.pk,
+            'user_pk': self.user.pk,
+        })
 
 
-class AbstractOrganizationOwner(six.with_metaclass(OrgMeta, SharedBaseModel, AbstractBaseOrganizationOwner)):
+class AbstractOrganizationOwner(SharedBaseModel, AbstractBaseOrganizationOwner, metaclass=OrgMeta):
     """
     Abstract OrganizationOwner model
     """

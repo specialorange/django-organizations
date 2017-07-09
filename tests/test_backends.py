@@ -1,11 +1,11 @@
 from django.contrib.auth.models import User
 from django.core import mail
-from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.http import QueryDict
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
+from django.urls import reverse
 
 from organizations.backends.defaults import BaseBackend
 from organizations.backends.defaults import InvitationBackend
@@ -123,7 +123,7 @@ class InvitationTests(TestCase):
         self.assertEquals(1, len(mail.outbox))
         self.assertEquals(
             mail.outbox[0].subject,
-            u"You've been added to an organization")
+            "You've been added to an organization")
 
 
 @override_settings(USE_TZ=True)
