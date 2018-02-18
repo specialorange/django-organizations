@@ -161,14 +161,19 @@ The underlying organizations API is simple::
     True
     >>> soundgarden.is_admin(chris)
     True
+
     >>> soundgarden.owner.organization_user
     <OrganizationUser: Chris Cornell>
     >>> soundgarden.owner.organization_user.user
     >>> <User: chris>
+    
     >>> audioslave = create_organization(chris, "Audioslave")
     >>> tom = User.objects.get(username="tom")
     >>> audioslave.add_user(tom, is_admin=True)
     <OrganizationUser: Tom Morello>
+    
+    >>> tom.organizations_organization.all()
+    <QuerySet [<Organization: Soundgarden>, <Organization: Audioslave>]>
 
 Custom models
 -------------
